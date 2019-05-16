@@ -6,13 +6,77 @@
 
 public class Polynom {
 
-    //TODO: declare variables
+    private class TreeNode {
+        public TreeNode l, r;
+        public Monom m;
+
+        public TreeNode (Monom m) {
+            this.m = m;
+        }
+
+        public void add (Monom m) {
+            if (!this.m.combine(m)) {
+                if (this.m.lowerDegreeThan(m)) {
+                    if (r == null) {
+                        r = new TreeNode(m);
+                    } else {
+                        r.add(m);
+                    }
+                } else {
+                    if (l == null) {
+                        l = new TreeNode(m);
+                    } else {
+                        l.add(m);
+                    }
+                }
+            }
+        }
+
+        public void applyTo(TreeNode tree) {
+            tree.add(m);
+            if (l != null) {
+                l.applyTo(tree);
+            }
+            if (r != null) {
+                r.applyTo(tree);
+            }
+        }
+
+        public int eval(int x) {
+            int sum = m.eval(x);
+            if (l != null) {
+                sum += l.eval(x);
+            }
+            if (r != null) {
+                sum += r.eval(x);
+            }
+            return sum;
+        }
+
+        public String toString() {
+            String sum = "";
+            if (l != null) {
+                sum += " + " + l;
+            }
+            if (m.a != 0) {
+                sum += " + " + m;
+            }
+            if (r != null) {
+                sum += r;
+            }
+            return sum;
+        }
+    }
+
+    private TreeNode root = new TreeNode(new Monom(0, 0));
 
     // Initializes this polynomial with multiple monomials. The coefficients of the monomials are
     // specified by 'coeffs', where coeffs[i] is the coefficient of the monomial of degree i.
     // Entries with value 0 are ignored, i.e. corresponding monomials are not stored in the polynomial.
     public Polynom(int[] coeffs) {
-        // TODO: implement this constructor
+        for (int i = 0; i < coeffs.length; i++) {
+            add(coeffs[i], i);
+        }
     }
 
     // Adds the monomial specified by 'coeff' and 'degree' to this polynomial, if coeff != 0,
@@ -20,19 +84,20 @@ public class Polynom {
     // If this polynomial already has a monomial of the same degree, no new monomial is added, instead
     // the coefficient of the monomial is modified accordingly ('combine' is called).
     public void add(int coeff, int degree) {
-        // TODO: implement this method
+        if (coeff != 0) {
+            root.add(new Monom(coeff, degree));
+        }
     }
 
     // Adds all monomials of 'p' to this polynomial.
     // (The rules of 'add(int,int)' apply for each monomial to be added.)
     public void add(Polynom p) {
-        // TODO: implement this method
+        p.root.applyTo(root);
     }
 
     // Returns the value of the polynomial for a specified value of 'x'
     public int eval(int x) {
-        // TODO: implement this method
-        return 0;
+        return root.eval(x);
     }
 
     // Returns a polynomial representation in mathematical notation such as
@@ -41,8 +106,11 @@ public class Polynom {
     // not shown.
     // Returns the string "0" if the polynomial has no monomials (is empty).
     public String toString() {
-        // TODO: implement this method
-        return "";
+        String s = root.toString();
+        if (s.isEmpty()) {
+            return "0";
+        }
+        return s.substring(3);
     }
 
 }
